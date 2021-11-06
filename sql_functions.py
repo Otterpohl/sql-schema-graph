@@ -10,6 +10,7 @@ def create_object_nodes(session, cursor, database):
     query = read_sql_file('Objects')
     dependencies = cursor.execute(query)
 
+    # "Upsert" a new sql object and add some metadata
     for dependency in dependencies:
         query = 'MERGE (n:{objectType} {{database: "{database}", \
             schema: "{schemaName}", name: "{objectName}"}})' .format(
@@ -36,6 +37,7 @@ def create_object_relationships(session, cursor):
     query = read_sql_file('ObjectDependencies')
     dependencies = cursor.execute(query)
 
+    # Create relationships depending on referenced object type
     for dependency in dependencies:
         query = """MATCH (a:{ReferencedEntityType}),(b:{ReferencingEntityType})
                    WHERE a.name = '{ObjectName}'
@@ -68,6 +70,7 @@ def create_key_relationships(session, cursor):
     query = read_sql_file('KeyRelationships')
     keys = cursor.execute(query)
 
+    # Create relationships depending on table keys
     for key in keys:
         query = """MATCH (a:Table),(b:Table)
                    WHERE a.name = '{PK_Table}' AND b.name = '{FK_Table}'
@@ -94,6 +97,7 @@ def create_key_relationships(session, cursor):
 
 
 def create_neo4j_database(session, database):
+    # Create or replace neo4j database... obviously...
     query = "CREATE OR REPLACE DATABASE {database}".format(database=database)
 
     logger.info("Recreating database => [{}]", database)
@@ -102,7 +106,8 @@ def create_neo4j_database(session, database):
     session.run(query)
 
 
-def read_sql_file(fileName):
+def read_sql_file(fileName) -> str:
+    # Get the content of a sql query file
     path = Path(__file__).parent /\
         "./sql_queries/{fileName}.sql".format(fileName=fileName)
     file = open(path)
@@ -118,6 +123,7 @@ def create_cross_database_relationships(session, cursor):
     query = read_sql_file('CrossDatabaseRelationships')
     dependencies = cursor.execute(query)
 
+    # Create relationships between databases depending on referenced object type
     for dependency in dependencies:
         query = """MATCH (a),(b)
                    WHERE (  a.name      = '{referenced_object}'
@@ -163,15 +169,21 @@ def main():
     driver = GraphDatabase.driver(uri, auth=("neo4j", "admin"))
     neo4jSession = driver.session()
 
+    # Create neo4j database
     neo4jDatabase = "sqldependencygraph"
     create_neo4j_database(neo4jSession, neo4jDatabase)
+
+    # Create neo4j Session
     neo4jSession = driver.session(database=neo4jDatabase)
 
+    # List of SQL Server databases to map
     databases = ["interface", "portia", "landmark", ]
 
+    # Create the object, dependency and key relationships within the database
     for database in databases:
         logger.info("Processing database => {}", database)
 
+        # Create SQL Server session for this Database
         sqlConnectionString = "Driver={{SQL Server}}; Server=.; Database=\
 {database}; Trusted_Connection=yes;".format(database=database)
         sqlSession = pyodbc.connect(sqlConnectionString)
@@ -181,12 +193,15 @@ def main():
         create_object_relationships(neo4jSession, sqlCursor)
         create_key_relationships(neo4jSession, sqlCursor)
 
+    # Create SQL Server session for any Database really, this time its master
     sqlConnectionString = "Driver={{SQL Server}}; Server=.; Database=\
 {database}; Trusted_Connection=yes;".format(database="master")
     sqlSession = pyodbc.connect(sqlConnectionString)
     sqlCursor = sqlSession.cursor()
 
+    # Create relationships between databases
     create_cross_database_relationships(neo4jSession, sqlCursor)
 
+    # Cleanup sessions
     sqlSession.close()
     driver.close()
