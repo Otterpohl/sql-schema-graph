@@ -1,3 +1,0 @@
-2021-11-06 20:23:23.586 | INFO     | sql_functions:main:161 - Creating Neo4j session
-2021-11-06 20:23:23.613 | INFO     | sql_functions:create_neo4j_database:99 - Recreating database => [sqldependencygraph]
-2021-11-06 20:23:28.936 | INFO     | sql_functions:main:173 - Processing database => interface
