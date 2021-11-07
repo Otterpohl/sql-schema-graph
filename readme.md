@@ -4,7 +4,7 @@ This is a tool that will create a [Neo4j](https://neo4j.com/) [Graph Database](h
 
 
 ## Example SQL Server schema dependencies
-![Screenshot](./blob/screenshot1.png)
+![Screenshot](https://github.com/Otterpohl/sql-schema-graph/blob/main/blob/Screenshot1.png)
 
 ## Example SQL Server object dependencies -Depth 1
-![Screenshot](./blob/screenshot2.png)
+![Screenshot](https://github.com/Otterpohl/sql-schema-graph/blob/main/blob/Screenshot2.png)
