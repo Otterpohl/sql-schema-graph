@@ -1,7 +1,5 @@
 # SQL Server Schema Graph Generator
 
-## Neo4j
-
 This is a tool that will create a [Neo4j Graph Database](https://neo4j.com/developer/graph-database/) of [SQL Server](https://www.microsoft.com/en-au/sql-server/sql-server-2019) databases, mapping the objects inter and intra dependencies.
 
 Whilst Neo4j does have the capability to [import data from SQL server](https://neo4j.com/labs/etl-tool/) directly, it does not represent a dataless schema very well. Especially when a database has been developed with very few table Key relationships.
