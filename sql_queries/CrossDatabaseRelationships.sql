@@ -11,7 +11,8 @@ SELECT database_id, [name]
 FROM sys.databases
 WHERE 1 = 1
     AND [state] <> 6
-    AND database_id > 4;
+    AND database_id > 4
+	AND name IN ({database_list});
 
 DECLARE 
     @database_id int, 

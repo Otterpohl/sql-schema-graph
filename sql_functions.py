@@ -2,6 +2,7 @@ import pyodbc
 from loguru import logger
 from neo4j import GraphDatabase
 from pathlib import Path
+import configparser
 
 
 def create_object_nodes(session, cursor, database):
@@ -12,8 +13,10 @@ def create_object_nodes(session, cursor, database):
 
     # "Upsert" a new sql object and add some metadata
     for dependency in dependencies:
-        query = 'MERGE (n:{objectType} {{database: "{database}", \
-            schema: "{schemaName}", name: "{objectName}"}})' .format(
+        query = 'MERGE (n:{objectType} \
+            {{database: "{database}", \
+            schema: "{schemaName}", \
+            name: "{objectName}"}})'.format(
             objectType=dependency.ObjectType,
             objectName=dependency.ObjectName,
             database=database,
@@ -74,8 +77,7 @@ def create_key_relationships(session, cursor):
     for key in keys:
         query = """MATCH (a:Table),(b:Table)
                    WHERE a.name = '{PK_Table}' AND b.name = '{FK_Table}'
-                   CREATE (a)<-[r:Key_Relationship {{name: 'PK:{PK_Column} \
-                       <-> FK:{FK_Column}'}}]-(b)
+                   CREATE (a)<-[r:Key_Relationship {{name: 'PK:{PK_Column} <-> FK:{FK_Column}'}}]-(b)
                    RETURN r""".format(
             PK_Table=key.PK_Table,
             FK_Table=key.FK_Table,
@@ -84,8 +86,7 @@ def create_key_relationships(session, cursor):
         )
 
         logger.debug(
-            "Creating Key relationship => [{FK_Table}]({FK_Column}) \
--> [{PK_Table}]({PK_Column})",
+            "Creating Key relationship => [{FK_Table}]({FK_Column}) -> [{PK_Table}]({PK_Column})",
             PK_Table=key.PK_Table,
             FK_Table=key.FK_Table,
             PK_Column=key.PK_Column,
@@ -117,10 +118,12 @@ def read_sql_file(fileName) -> str:
     return data
 
 
-def create_cross_database_relationships(session, cursor):
+def create_cross_database_relationships(session, cursor, databases):
     logger.info("Creating cross database relationships")
 
     query = read_sql_file('CrossDatabaseRelationships')
+    query = query.format(database_list=str(databases)[1:-1])
+    print(query)
     dependencies = cursor.execute(query)
 
     # Create relationships between databases depending on referenced object type
@@ -164,9 +167,26 @@ def create_cross_database_relationships(session, cursor):
 
 def main():
     # Create neo4j session
+    logger.info("Fetching config")
+
+    config = configparser.ConfigParser(converters={'list': lambda x: [
+        i.strip() for i in x.split(',')]})
+    config.read('F:\Programming\GenerateSQLGraph\.env')
+
+    # Neo4j credentials
+    NEO4J_USERNAME = config["ne4j-config"]["Username"]
+    NEO4J_PASSWORD = config["ne4j-config"]["Password"]
+
+    # SQL Instance to graph
+    SQL_SERVER = config["sql-server-config"]["ServerInstance"]
+
+    # List of SQL Server databases to map
+    DATABASES = list(map(str, config.getlist(
+        'sql-server-config', 'Databases')))
+
     logger.info("Creating Neo4j session")
     uri = "neo4j://localhost:7687"
-    driver = GraphDatabase.driver(uri, auth=("neo4j", "admin"))
+    driver = GraphDatabase.driver(uri, auth=(NEO4J_USERNAME, NEO4J_PASSWORD))
     neo4jSession = driver.session()
 
     # Create neo4j database
@@ -176,16 +196,17 @@ def main():
     # Create neo4j Session
     neo4jSession = driver.session(database=neo4jDatabase)
 
-    # List of SQL Server databases to map
-    databases = ["AdventureWorksLT2019", ]
-
     # Create the object, dependency and key relationships within the database
-    for database in databases:
+    for database in DATABASES:
         logger.info("Processing database => {}", database)
 
         # Create SQL Server session for this Database
-        sqlConnectionString = "Driver={{SQL Server}}; Server=.; Database=\
-{database}; Trusted_Connection=yes;".format(database=database)
+        sqlConnectionString = "Driver={{SQL Server}}; Server={SQL_SERVER}; \
+Database={database}; \
+Trusted_Connection=yes;".format(
+            database=database,
+            SQL_SERVER=SQL_SERVER)
+
         sqlSession = pyodbc.connect(sqlConnectionString)
         sqlCursor = sqlSession.cursor()
 
@@ -193,14 +214,18 @@ def main():
         create_object_relationships(neo4jSession, sqlCursor)
         create_key_relationships(neo4jSession, sqlCursor)
 
+        # Close this iterations sqlSession
+        sqlSession.close()
+
     # Create SQL Server session for any Database really, this time its master
-    sqlConnectionString = "Driver={{SQL Server}}; Server=.; Database=\
-{database}; Trusted_Connection=yes;".format(database="master")
+    sqlConnectionString = "Driver={{SQL Server}}; Server={SQL_SERVER}; \
+Database={database}; \
+Trusted_Connection=yes;".format(database="master", SQL_SERVER=SQL_SERVER)
     sqlSession = pyodbc.connect(sqlConnectionString)
     sqlCursor = sqlSession.cursor()
 
     # Create relationships between databases
-    create_cross_database_relationships(neo4jSession, sqlCursor)
+    create_cross_database_relationships(neo4jSession, sqlCursor, DATABASES)
 
     # Cleanup sessions
     sqlSession.close()
