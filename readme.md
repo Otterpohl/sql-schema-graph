@@ -24,7 +24,7 @@ Whilst Neo4j does have the capability to [import data from SQL server](https://n
 call db.schema.visualization()
 ```
 
-![Screenshot](./blob/screenshot1.png)
+![Screenshot](https://github.com/Otterpohl/sql-schema-graph/blob/main/blob/screenshot1.png)
 
 ## Example 2 - Object (uspPrintError) Dependencies - Depth 1
 
@@ -32,7 +32,7 @@ call db.schema.visualization()
 MATCH (t {name: "uspPrintError"})-[r]-(a) RETURN *
 ```
 
-![Screenshot](./blob/screenshot2.png)
+![Screenshot](https://github.com/Otterpohl/sql-schema-graph/blob/main/blob/screenshot2.png)
 
 ## Example 3 - Object Dependencies - Depth 2
 
@@ -40,5 +40,5 @@ MATCH (t {name: "uspPrintError"})-[r]-(a) RETURN *
 MATCH (t {name: "uspPrintError"})-[r*1..3]-(a) RETURN *
 ```
 
-![Screenshot](./blob/screenshot3.png)
+![Screenshot](https://github.com/Otterpohl/sql-schema-graph/blob/main/blob/screenshot3.png)
 ---
