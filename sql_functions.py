@@ -170,7 +170,8 @@ def main():
 
     config = configparser.ConfigParser(converters={'list': lambda x: [
         i.strip() for i in x.split(',')]})
-    config.read('F:\Programming\GenerateSQLGraph\.env')
+    configfile = str(Path(__file__).resolve().parent) + "\.env"
+    config.read(configfile)
 
     # Neo4j credentials
     NEO4J_USERNAME = config["ne4j-config"]["Username"]
