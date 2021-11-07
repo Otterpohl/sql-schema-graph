@@ -165,7 +165,8 @@ def create_cross_database_relationships(session, cursor, databases):
 
 
 def main():
-    # Create neo4j session
+
+    # Fetch and parse config
     logger.info("Fetching config")
 
     config = configparser.ConfigParser(converters={'list': lambda x: [
@@ -176,6 +177,9 @@ def main():
     # Neo4j credentials
     NEO4J_USERNAME = config["ne4j-config"]["Username"]
     NEO4J_PASSWORD = config["ne4j-config"]["Password"]
+    NEO4J_SERVER = config["ne4j-config"]["Server"]
+    NEO4J_PORT = config["ne4j-config"]["Port"]
+    NEO4J_DATABASE = config["ne4j-config"]["Database"]
 
     # SQL Instance to graph
     SQL_SERVER = config["sql-server-config"]["ServerInstance"]
@@ -184,17 +188,20 @@ def main():
     DATABASES = list(map(str, config.getlist(
         'sql-server-config', 'Databases')))
 
+    # Create neo4j session
     logger.info("Creating Neo4j session")
-    uri = "neo4j://localhost:7687"
+    uri = "neo4j://{neo4j_server}:{port}".format(
+        neo4j_server=NEO4J_SERVER,
+        port=NEO4J_PORT
+    )
     driver = GraphDatabase.driver(uri, auth=(NEO4J_USERNAME, NEO4J_PASSWORD))
     neo4jSession = driver.session()
 
     # Create neo4j database
-    neo4jDatabase = "sqldependencygraph"
-    create_neo4j_database(neo4jSession, neo4jDatabase)
+    create_neo4j_database(neo4jSession, NEO4J_DATABASE)
 
     # Create neo4j Session
-    neo4jSession = driver.session(database=neo4jDatabase)
+    neo4jSession = driver.session(database=NEO4J_DATABASE)
 
     # Create the object, dependency and key relationships within the database
     for database in DATABASES:
