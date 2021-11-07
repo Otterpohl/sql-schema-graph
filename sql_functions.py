@@ -177,7 +177,7 @@ def main():
     neo4jSession = driver.session(database=neo4jDatabase)
 
     # List of SQL Server databases to map
-    databases = ["interface", "portia", "landmark", ]
+    databases = ["AdventureWorksLT2019", ]
 
     # Create the object, dependency and key relationships within the database
     for database in databases:

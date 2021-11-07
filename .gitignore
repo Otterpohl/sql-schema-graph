@@ -136,3 +136,6 @@ dmypy.json
 
 # Cython debug symbols
 cython_debug/
+
+# SQL Server Database
+/blob/AdventureWorksLT2019.bak
