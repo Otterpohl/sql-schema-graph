@@ -123,7 +123,6 @@ def create_cross_database_relationships(session, cursor, databases):
 
     query = read_sql_file('CrossDatabaseRelationships')
     query = query.format(database_list=str(databases)[1:-1])
-    print(query)
     dependencies = cursor.execute(query)
 
     # Create relationships between databases depending on referenced object type
@@ -218,9 +217,9 @@ Trusted_Connection=yes;".format(
         sqlSession.close()
 
     # Create SQL Server session for any Database really, this time its master
-    sqlConnectionString = "Driver={{SQL Server}}; Server={SQL_SERVER}; \
+    sqlConnectionString = "Driver={{SQL Server}}; Server={sql_server}; \
 Database={database}; \
-Trusted_Connection=yes;".format(database="master", SQL_SERVER=SQL_SERVER)
+Trusted_Connection=yes;".format(database="master", sql_server=SQL_SERVER)
     sqlSession = pyodbc.connect(sqlConnectionString)
     sqlCursor = sqlSession.cursor()
 
