@@ -34,7 +34,7 @@ MATCH (t {name: "uspPrintError"})-[r]-(a) RETURN *
 
 ![Screenshot](./blob/Screenshot2.png)
 
-## Example 3 - Object Dependencies - Depth 2
+## Example 3 - Object (uspPrintError) Dependencies - Depth 3
 
 ```cypher
 MATCH (t {name: "uspPrintError"})-[r*1..3]-(a) RETURN *
