@@ -11,9 +11,6 @@ Whilst Neo4j does have the capability to [import data from SQL server](https://n
 3. [Install Python](https://www.python.org/downloads/)
 4. Edit the necessary configuration in the file called `example.env` and rename it to `.env`
 5. Run `main.py`
-    ```python
-    python -m main.py
-    ```
 5. Open Neo4j Desktop and query the `sqldependencygraph` database
 ---
 # Examples
