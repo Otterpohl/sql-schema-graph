@@ -7,7 +7,7 @@ CREATE TABLE #databases
     database_name sysname NOT NULL
 );
 
--- Setup a list of databases to check, this comes from the `.env` config file
+/* Setup a list of databases to check, this comes from the `.env` config file */
 INSERT INTO #databases
 (
     database_id,
@@ -37,7 +37,7 @@ CREATE TABLE #dependencies
     referenced_object_type varchar(max) NULL
 );
 
--- get both the intra and inter database dependencies
+/* get both the intra and inter database dependencies */
 WHILE
 (SELECT COUNT(*) FROM #databases) > 0
 BEGIN
@@ -86,7 +86,7 @@ INTO @referenced_database,
      @referenced_schema,
      @referenced_object_name
 
--- get the referenced object type, this will be for the relationship name
+/* get the referenced object type, this will be for the relationship name */
 WHILE @@FETCH_STATUS = 0
 BEGIN
     SET @sql
@@ -123,7 +123,7 @@ END
 CLOSE dependency_cursor
 DEALLOCATE dependency_cursor
 
--- return only the cross database dependencies that are not owned by the sys schema
+/* return only the cross database dependencies that are not owned by the sys schema */
 SELECT referencing_database,
        referencing_schema,
        referencing_object_name,

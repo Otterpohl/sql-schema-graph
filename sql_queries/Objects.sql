@@ -1,4 +1,4 @@
--- i feel like this is extra self explanatory
+/* i feel like this is extra self explanatory */
 SELECT s.name as SchemaName
     , o.name as ObjectName
     , CASE o.type_desc 

@@ -1,4 +1,4 @@
--- i feel like this is self explanatory
+/* i feel like this is self explanatory */
 SELECT
     PK.TABLE_NAME as PK_Table,
     PT.COLUMN_NAME as PK_Column,

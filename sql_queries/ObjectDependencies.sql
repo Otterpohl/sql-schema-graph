@@ -1,4 +1,4 @@
--- get all objects dependent on other object, self referenced are filtered out
+/* get all objects dependent on other object, self referenced are filtered out */
 SELECT o.name as ObjectName 
     , CASE o.type_desc 
                 WHEN 'SQL_STORED_PROCEDURE' THEN 'stored_procedure'
