@@ -61,7 +61,7 @@ BEGIN
 						NULL
 				FROM ' + quotename(@database_name)
           + '.sys.sql_expression_dependencies d
-				WHERE d.referenced_database_name in (SELECT database_name FROM #databases)';
+				WHERE d.referenced_database_name COLLATE SQL_Latin1_General_CP1_CI_AS in (SELECT database_name FROM #databases)';
 
     EXEC sys.sp_executesql @Statement = @sql;
 
