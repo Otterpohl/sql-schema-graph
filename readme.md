@@ -19,7 +19,11 @@ Whilst Neo4j does have the capability to [import data from SQL server](https://n
 ## Example 1 - Schema Dependencies Graph
 
 ```cypher
-call db.schema.visualization()
+CALL db.schema.visualization()
+```
+OR
+```cypher
+CALL apoc.meta.graph()
 ```
 
 ![Screenshot](./blob/Screenshot1.png)
