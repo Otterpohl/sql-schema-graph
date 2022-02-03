@@ -1,4 +1,4 @@
 decouple==0.0.7
-loguru==0.5.3
+loguru==0.6.0
 neo4j==4.3.1
 pyodbc==4.0.30
